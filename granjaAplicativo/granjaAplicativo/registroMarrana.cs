@@ -242,9 +242,9 @@ namespace granjaAplicativo
             estilosDatagridview(dataGridView3, true, 543);
             var listaValores = new (string, string)[]
             {
-                ("Día 1", "Ingesta de calostro, pesaje, limpieza, desinfección de ombligo, corte de colmillos y descole."),
-                ("Día 3", "Aplicación de hierro para prevenir anemia."),
-                ("Día 7", "Suplemento alimenticio (Piggy Milk / Baby Pig)."),
+                ("1º", "Ingesta de calostro, pesaje, limpieza, desinfección de ombligo, corte de colmillos y descole."),
+                ("3º", "Aplicación de hierro para prevenir anemia."),
+                ("7º", "Suplemento alimenticio (Piggy Milk / Baby Pig)."),
                 ("", "Destete con control de peso.")
             };
             foreach (var item in listaValores)
