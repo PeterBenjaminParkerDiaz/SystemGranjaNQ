@@ -5,8 +5,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace granjaAplicativo
 {
@@ -75,7 +77,7 @@ namespace granjaAplicativo
 
             string sqlTablaLechones = $@"CREATE TABLE lechones_{nombreTablas} ( Id INT AUTO_INCREMENT PRIMARY KEY,
                                         NroLechon INT, Sexo VARCHAR(10), PezonI INT, PezonD INT,PesoNacimiento VARCHAR(50),
-                                        PesoTransferencia VARCHAR(50), PesoDestete VARCHAR(50), Observaciones VARCHAR(255));";
+                                        PesoTransferencia VARCHAR(50), PesoDestete VARCHAR(50), Observaciones VARCHAR(255), tresFechas VARCHAR(40));";
 
             using (MySqlConnection conexion = Conectar())
             {
@@ -109,6 +111,102 @@ namespace granjaAplicativo
                 }
             }           
         }
+
+        public List<object> valoresTraidos(string nombreTabla)
+        {
+            List<object> datosDevolver = new List<object>();
+            string consultaSQL = $"SELECT * FROM registro_{nombreTabla};";
+            using(MySqlConnection connec = Conectar())
+            {
+                using(MySqlCommand comando = new MySqlCommand(consultaSQL, connec))
+                {
+                    using(MySqlDataReader leer = comando.ExecuteReader())
+                    {
+                        if (leer.Read())
+                        {
+                            for(int i = 1; i < 14; i++)
+                            {
+                                datosDevolver.Add(leer.IsDBNull(i) ? null : leer.GetValue(i));
+                            }
+                        }
+                    }
+                }
+            }
+            return datosDevolver;
+        }
+        public bool insertarCamadas(string NumberMarrana, string razaMarrana, int? numeroPezones, string indParto, DateTime? partoCal, DateTime? partoReal,
+                                    string camadaNur, string machoNumber, string razaMacho, DateTime? fechaServicio, TimeSpan? horaInicio, TimeSpan? horaFin,
+                                    string numeroParidera, string marranatabla){
+            try
+            {
+                string verificarExiste = $"SELECT COUNT(*) FROM registro_{marranatabla};";
+
+                using (MySqlConnection conn = Conectar())
+                {
+                    bool existeFila = false;
+                    using (MySqlCommand comando = new MySqlCommand(verificarExiste, conn))
+                    {
+                        int cantidad = Convert.ToInt32(comando.ExecuteScalar());
+                        existeFila = cantidad > 0;
+                    }
+                    if (existeFila) // Existe fila → UPDATE
+                    {
+                        string sql = $@"UPDATE registro_{marranatabla} SET MarranaNro = @MarranaNro, Raza = @Raza, NP = @NP, IndParto = @IndParto, PartoCalc = @PartoCalc,
+                                        PartoReal = @PartoReal, CamadaNo = @CamadaNo, MachoNro = @MachoNro, RazaMacho = @RazaMacho, FechaServicio = @FechaServicio,
+                                        HoraInicioParto = @HoraInicioParto, HoraFinParto = @HoraFinParto, NroParidera = @NroParidera;";
+
+                        using (MySqlCommand comando = new MySqlCommand(sql, conn))
+                        {
+                            comando.Parameters.AddWithValue("@MarranaNro", NumberMarrana ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@Raza", razaMarrana ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@NP", numeroPezones ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@IndParto", indParto ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@PartoCalc", partoCal ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@PartoReal", partoReal ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@CamadaNo", camadaNur ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@MachoNro", machoNumber ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@RazaMacho", razaMacho ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@FechaServicio", fechaServicio ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@HoraInicioParto", horaInicio ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@HoraFinParto", horaFin ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@NroParidera", numeroParidera ?? (object)DBNull.Value);
+                            int filasAfectadas = comando.ExecuteNonQuery();
+                            return filasAfectadas > 0;
+                        }
+                    }
+                    else // No existe fila → INSERT
+                    {
+                        string sql = $@" INSERT INTO registro_{marranatabla} (MarranaNro, Raza, NP,IndParto, PartoCalc, PartoReal, CamadaNo, MachoNro, 
+                                        RazaMacho, FechaServicio, HoraInicioParto, HoraFinParto, NroParidera) VALUES(@MarranaNro, @Raza, @NP, @IndParto,
+                        @PartoCalc, @PartoReal, @CamadaNo, @MachoNro, @RazaMacho, @FechaServicio, @HoraInicioParto, @HoraFinParto, @NroParidera);";
+
+                        using (MySqlCommand comando = new MySqlCommand(sql, conn))
+                        {
+                            comando.Parameters.AddWithValue("@MarranaNro", NumberMarrana ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@Raza", razaMarrana ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@NP", numeroPezones ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@IndParto", indParto ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@PartoCalc", partoCal ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@PartoReal", partoReal ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@CamadaNo", camadaNur ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@MachoNro", machoNumber ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@RazaMacho", razaMacho ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@FechaServicio", fechaServicio ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@HoraInicioParto", horaInicio ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@HoraFinParto", horaFin ?? (object)DBNull.Value);
+                            comando.Parameters.AddWithValue("@NroParidera", numeroParidera ?? (object)DBNull.Value);
+                            int filasAfectadas = comando.ExecuteNonQuery();
+                            return filasAfectadas > 0;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hubo un problema: " + ex.Message);
+                return false;
+            }
+        }
         public List<Tuple<string, string>> listaNombres()
         {
             List<Tuple<string, string>> resulat = new List<Tuple<string, string>>();
@@ -130,24 +228,44 @@ namespace granjaAplicativo
             }
             return resulat;
         }
-        public bool eliminarMarrana(string codigo)
+        public bool eliminarMarrana(string codigo, string nameTablaBorrar)
         {
             try
             {
-                string consultaSQL = "DELETE FROM namemarranas WHERE codigoFila = @codigoArgumento;";
+                string consultaSQL1 = $"DROP TABLE IF EXISTS registro_{nameTablaBorrar}, lechones_{nameTablaBorrar};";
+                string consultaSQL2 = "DELETE FROM namemarranas WHERE codigoFila = @codigoArgumento;";
                 using (MySqlConnection conect = Conectar())
                 {
-                    using (MySqlCommand comando = new MySqlCommand(consultaSQL, conect))
+                    using (MySqlTransaction transa = conect.BeginTransaction())
                     {
-                        comando.Parameters.AddWithValue("@codigoArgumento", codigo);
-                        int filasEliminadas = comando.ExecuteNonQuery();
-                        return filasEliminadas > 0;
+                        try
+                        {
+                            using (MySqlCommand comando1 = new MySqlCommand(consultaSQL1, conect, transa))
+                            {
+                                comando1.ExecuteNonQuery();
+                            }
+
+                            using (MySqlCommand comando2 = new MySqlCommand(consultaSQL2, conect, transa))
+                            {
+                                comando2.Parameters.AddWithValue("@codigoArgumento", codigo);
+                                comando2.ExecuteNonQuery();
+                            }
+
+                            transa.Commit();
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            transa.Rollback();
+                            MessageBox.Show("Ocurrió un error: " + ex.Message);
+                            return false;
+                        }
                     }
                 }
             }
             catch (Exception es)
             {
-                MessageBox.Show("Error al eliminar marrana: " + es.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al eliminar marrana: " + es.Message);
                 return false;
             }
         }

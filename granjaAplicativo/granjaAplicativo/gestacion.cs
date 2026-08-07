@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -70,7 +71,7 @@ namespace granjaAplicativo
             formulario.BackColor = Color.White;
             formulario.FormBorderStyle = FormBorderStyle.FixedSingle;
 
-            string nombreMarrana = dataGridView1.Rows[e.RowIndex].Cells["Nombres"].Value?.ToString();
+            string nombreMarrana = dataGridView1.Rows[e.RowIndex].Cells["Nombres"].Value?.ToString().Trim();
 
             Label titulo = new Label();
             titulo.Text = nombreMarrana;
@@ -163,6 +164,15 @@ namespace granjaAplicativo
             string valorIngresado = textBox1.Text.Trim();
             string codigofila = "m_" + Guid.NewGuid().ToString("N").Substring(0, 8);
 
+            //verifiamos que sea un nombre válido
+            string regex = "^[a-zA-Z0-9]+(?: [a-zA-Z0-9]+)*$";
+            if(!Regex.IsMatch(valorIngresado, regex))
+            {
+                MessageBox.Show("El nombre ingresado no es válido.\n\n" +"Solo se permiten letras, números y espacios entre palabras.\n" +
+                        "No se permiten símbolos especiales.", "Nombre no válido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            //Evitamos que se dupliquen las mismas marranas
             if (conect.verificarExisteTabla(valorIngresado.ToLower().Replace(" ", "_")))
             {
                 MessageBox.Show("Esta marrana ya esta registrada, ingrese un nombre o identificación diferente", "Información",
@@ -214,7 +224,7 @@ namespace granjaAplicativo
                 string codigoEliminarItem = listasTraidas[indice].Item2;
                 if (string.IsNullOrWhiteSpace(codigoEliminarItem)) return;
 
-                if (conect.eliminarMarrana(codigoEliminarItem))
+                if (conect.eliminarMarrana(codigoEliminarItem, nombreMarrana.Trim().ToLower().Replace(" ", "_")))
                 {
                     DataGridViewRow filaEncon = dataGridView1.Rows.Cast<DataGridViewRow>()
                         .FirstOrDefault(op => op.Tag?.ToString() == codigoEliminarItem);

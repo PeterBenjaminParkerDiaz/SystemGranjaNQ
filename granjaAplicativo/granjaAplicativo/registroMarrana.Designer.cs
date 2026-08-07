@@ -38,6 +38,7 @@
             button1 = new Button();
             button3 = new Button();
             label4 = new Label();
+            GuardarCamadas = new Button();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView3).BeginInit();
@@ -81,7 +82,7 @@
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.Maroon;
-            label1.Location = new Point(356, -1);
+            label1.Location = new Point(387, -2);
             label1.Name = "label1";
             label1.Size = new Size(72, 30);
             label1.TabIndex = 3;
@@ -102,7 +103,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.Location = new Point(12, 22);
+            label2.Location = new Point(7, 22);
             label2.Name = "label2";
             label2.Size = new Size(189, 21);
             label2.TabIndex = 5;
@@ -113,7 +114,7 @@
             label3.Anchor = AnchorStyles.Top;
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI Semibold", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.Location = new Point(8, 519);
+            label3.Location = new Point(7, 515);
             label3.Name = "label3";
             label3.Size = new Size(193, 21);
             label3.TabIndex = 6;
@@ -150,12 +151,24 @@
             label4.TabIndex = 10;
             label4.Text = "LECHONES";
             // 
+            // GuardarCamadas
+            // 
+            GuardarCamadas.Anchor = AnchorStyles.Top;
+            GuardarCamadas.Location = new Point(202, 17);
+            GuardarCamadas.Name = "GuardarCamadas";
+            GuardarCamadas.Size = new Size(134, 26);
+            GuardarCamadas.TabIndex = 11;
+            GuardarCamadas.Text = "Guardar cambios";
+            GuardarCamadas.UseVisualStyleBackColor = true;
+            GuardarCamadas.Click += GuardarCamadas_Click;
+            // 
             // registroMarrana
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.ButtonHighlight;
             ClientSize = new Size(830, 675);
+            Controls.Add(GuardarCamadas);
             Controls.Add(label4);
             Controls.Add(button3);
             Controls.Add(button1);
@@ -190,5 +203,6 @@
         private Button button1;
         private Button button3;
         private Label label4;
+        private Button GuardarCamadas;
     }
 }

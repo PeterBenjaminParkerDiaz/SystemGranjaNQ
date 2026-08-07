@@ -12,6 +12,7 @@ namespace granjaAplicativo
 {
     public partial class registroMarrana : Form
     {
+        conexionBaseDatos conection = new conexionBaseDatos();
         public registroMarrana()
         {
             InitializeComponent();
@@ -23,7 +24,15 @@ namespace granjaAplicativo
 
             dataGridView1.Columns.Add("Marrana Nro", "Marrana Nro");
             dataGridView1.Columns.Add("Raza", "Raza");
+
+            NumericUpDown numberPartos = new NumericUpDown();
+            numberPartos.Minimum = 0;
+            numberPartos.Maximum = 100;
+            numberPartos.Visible = false;
+            numberPartos.Font = new Font("Segoe UI", 11F);
+            dataGridView1.Controls.Add(numberPartos);
             dataGridView1.Columns.Add("NP", "NP");
+
             dataGridView1.Columns.Add("Ind. Parto", "Ind. Parto");
 
             DateTimePicker fechaCalcu = new DateTimePicker();
@@ -75,45 +84,53 @@ namespace granjaAplicativo
 
             dataGridView1.CellBeginEdit += (es, er) =>
             {
-                DateTimePicker cualDioCli = null;
-
+                Control controlActivo = null;
                 if (er.RowIndex >= 0)
                 {
-                    if (er.ColumnIndex == dataGridView1.Columns["Parto Calc"].Index)
+                    if (er.ColumnIndex == dataGridView1.Columns["NP"].Index)
                     {
-                        cualDioCli = fechaCalcu; // DateTimePicker de fecha
+                        controlActivo = numberPartos; //Subir o bajar número
+                    }
+                    else if (er.ColumnIndex == dataGridView1.Columns["Parto Calc"].Index)
+                    {
+                        controlActivo = fechaCalcu; //Fecha
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Parto Real"].Index)
                     {
-                        cualDioCli = fechaRealParto; // DateTimePicker de fecha
+                        controlActivo = fechaRealParto; //Fecha
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Fecha Servicio"].Index)
                     {
-                        cualDioCli = fechaServic; // DateTimePicker de fecha
+                        controlActivo = fechaServic; //Fecha
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Hora inicio parto"].Index)
                     {
-                        cualDioCli = horaInicio; // DateTimePicker de hora
+                        controlActivo = horaInicio; //Hora
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Hora fin parto"].Index)
                     {
-                        cualDioCli = horaFinal; // DateTimePicker de hora
+                        controlActivo = horaFinal; //Hora
                     }
                 }
-
-                if (cualDioCli != null)
+                if (controlActivo != null)
                 {
-                    Rectangle rectangulo = dataGridView1.GetCellDisplayRectangle(er.ColumnIndex, er.RowIndex, true);
-                    cualDioCli.Size = rectangulo.Size;
-                    cualDioCli.Location = rectangulo.Location;
-                    cualDioCli.Visible = true;
-                    if (dataGridView1.CurrentCell != null && dataGridView1.CurrentCell.Value != null)
+                    Rectangle rect = dataGridView1.GetCellDisplayRectangle(er.ColumnIndex, er.RowIndex, true);
+                    controlActivo.Size = rect.Size;
+                    controlActivo.Location = rect.Location;
+                    controlActivo.Visible = true;
+
+                    if (dataGridView1.CurrentCell != null)
                     {
-                        cualDioCli.Value = Convert.ToDateTime(dataGridView1.CurrentCell.Value);
+                        if (controlActivo is DateTimePicker dtp)
+                            dtp.Value = DateTime.TryParse(dataGridView1.CurrentCell.Value?.ToString(), out DateTime fechaValor) ? fechaValor : DateTime.Now;
+
+                        else if (controlActivo is NumericUpDown num)
+                            num.Value = int.TryParse(dataGridView1.CurrentCell.Value?.ToString(), out int numPezones) ? numPezones : 0;
                     }
                     else
                     {
-                        cualDioCli.Value = DateTime.Now;
+                        if (controlActivo is DateTimePicker dtp) dtp.Value = DateTime.Now;
+                        else if (controlActivo is NumericUpDown num) num.Value = 0;
                     }
                 }
             };
@@ -121,29 +138,34 @@ namespace granjaAplicativo
             {
                 if (er.RowIndex >= 0)
                 {
-                    if (er.ColumnIndex == dataGridView1.Columns["Parto Calc"].Index)
+                    if (er.ColumnIndex == dataGridView1.Columns["NP"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells[er.ColumnIndex].Value = fechaCalcu.Value.ToShortDateString();
+                        dataGridView1.Rows[er.RowIndex].Cells["NP"].Value = (int)numberPartos.Value;
+                        numberPartos.Visible = false;
+                    }
+                    else if (er.ColumnIndex == dataGridView1.Columns["Parto Calc"].Index)
+                    {
+                        dataGridView1.Rows[er.RowIndex].Cells["Parto Calc"].Value = fechaCalcu.Value.ToString("dd/MM/yyyy");
                         fechaCalcu.Visible = false;
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Parto Real"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells[er.ColumnIndex].Value = fechaRealParto.Value.ToShortDateString();
+                        dataGridView1.Rows[er.RowIndex].Cells["Parto Real"].Value = fechaRealParto.Value.ToString("dd/MM/yyyy");
                         fechaRealParto.Visible = false;
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Fecha Servicio"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells[er.ColumnIndex].Value = fechaServic.Value.ToShortDateString();
+                        dataGridView1.Rows[er.RowIndex].Cells["Fecha Servicio"].Value = fechaServic.Value.ToString("dd/MM/yyyy");
                         fechaServic.Visible = false;
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Hora inicio parto"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells[er.ColumnIndex].Value = horaInicio.Value.ToString("HH:mm:ss");
+                        dataGridView1.Rows[er.RowIndex].Cells["Hora inicio parto"].Value = horaInicio.Value.ToString("HH:mm:ss");
                         horaInicio.Visible = false;
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Hora fin parto"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells[er.ColumnIndex].Value = horaFinal.Value.ToString("HH:mm:ss");
+                        dataGridView1.Rows[er.RowIndex].Cells["Hora fin parto"].Value = horaFinal.Value.ToString("HH:mm:ss");
                         horaFinal.Visible = false;
                     }
                 }
@@ -193,19 +215,19 @@ namespace granjaAplicativo
                 {
                     numeroLech.Bounds = rect;
                     numeroLech.Visible = true;
-                    numeroLech.Value = decimal.TryParse(dataGridView2.CurrentCell.Value?.ToString(), out decimal val) ? val : 0;
+                    numeroLech.Value = int.TryParse(dataGridView2.CurrentCell?.Value?.ToString(), out int val) ? val : 0;
                 }
                 else if (e.ColumnIndex == dataGridView2.Columns["Pezon I"].Index)
                 {
                     numIzquierdo.Bounds = rect;
                     numIzquierdo.Visible = true;
-                    numIzquierdo.Value = decimal.TryParse(dataGridView2.CurrentCell.Value?.ToString(), out decimal val) ? val : 0;
+                    numIzquierdo.Value = int.TryParse(dataGridView2.CurrentCell?.Value?.ToString(), out int val) ? val : 0;
                 }
                 else if (e.ColumnIndex == dataGridView2.Columns["Pezon D"].Index)
                 {
                     numDerecho.Bounds = rect;
                     numDerecho.Visible = true;
-                    numDerecho.Value = decimal.TryParse(dataGridView2.CurrentCell.Value?.ToString(), out decimal val) ? val : 0;
+                    numDerecho.Value = int.TryParse(dataGridView2.CurrentCell?.Value?.ToString(), out int val) ? val : 0;
                 }
             };
             dataGridView2.CellEndEdit += (s, e) =>
@@ -213,17 +235,17 @@ namespace granjaAplicativo
                 if (e.RowIndex < 0) return;
                 if (e.ColumnIndex == dataGridView2.Columns["Nro lechón"].Index)
                 {
-                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = numeroLech.Value;
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numeroLech.Value;
                     numeroLech.Visible = false;
                 }
                 else if (e.ColumnIndex == dataGridView2.Columns["Pezon I"].Index)
                 {
-                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = numIzquierdo.Value;
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numIzquierdo.Value;
                     numIzquierdo.Visible = false;
                 }
                 else if (e.ColumnIndex == dataGridView2.Columns["Pezon D"].Index)
                 {
-                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = numDerecho.Value;
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numDerecho.Value;
                     numDerecho.Visible = false;
                 }
             };
@@ -249,7 +271,7 @@ namespace granjaAplicativo
             };
             foreach (var item in listaValores)
             {
-                dataGridView3.Rows.Add(item.Item1,"",item.Item2);
+                dataGridView3.Rows.Add(item.Item1, "", item.Item2);
             }
             dataGridView3.CellBeginEdit += (es, er) =>
             {
@@ -273,14 +295,42 @@ namespace granjaAplicativo
             };
             dataGridView3.CellEndEdit += (es, er) =>
             {
-                if(er.RowIndex >= 0 && er.ColumnIndex == dataGridView3.Columns["Fecha"].Index)
+                if (er.RowIndex >= 0 && er.ColumnIndex == dataGridView3.Columns["Fecha"].Index)
                 {
                     dataGridView3.Rows[er.RowIndex].Cells[er.ColumnIndex].Value = fechIngresami.Value.ToShortDateString();
                     fechIngresami.Visible = false;
                 }
             };
-        }
 
+            var DatosTraidos = conection.valoresTraidos(label1.Text.Trim().ToLower().Replace(" ", "_"));
+            if (DatosTraidos.Count > 0)
+            {
+                DataGridViewRow fila = dataGridView1.Rows[0];
+                for (int i = 0; i < DatosTraidos.Count; i++)
+                {
+                    if (DatosTraidos[i] == null) continue;
+                    if (i == 4 || i == 5 || i == 9)
+                    {
+                        if (DateTime.TryParse(DatosTraidos[i].ToString(), out DateTime fecha))
+                        {
+                            fila.Cells[i].Value = fecha.ToString("dd/MM/yyyy");
+                        }
+                    }
+                    else if (i == 10 || i == 11)
+                    {
+                        if (TimeSpan.TryParse(DatosTraidos[i].ToString(), out TimeSpan hora))
+                        {
+                            fila.Cells[i].Value = hora.ToString(@"hh\:mm\:ss");
+                        }
+                    }
+                    else
+                    {
+                        fila.Cells[i].Value = DatosTraidos[i];
+                    }
+                }
+            }
+
+        }
         private void estilosDatagridview(DataGridView data, bool estado = false, int? altura = null)
         {
             data.RowHeadersVisible = false;
@@ -326,6 +376,32 @@ namespace granjaAplicativo
         private void agregarFila_Click(object sender, EventArgs e)
         {
             dataGridView2.Rows.Insert(0, 1);
+        }
+
+        private void GuardarCamadas_Click(object sender, EventArgs e)
+        {
+            DataGridViewRow fila1 = dataGridView1.Rows[0];
+
+            string NumberMarrana = fila1.Cells[0].Value?.ToString().Trim();
+            string razaMarrana = fila1.Cells[1].Value?.ToString().Trim();
+            int? numeroPezones = int.TryParse(fila1.Cells[2].Value?.ToString(), out int numero) ? numero : null;
+            string indParto = fila1.Cells[3].Value?.ToString().Trim();
+            DateTime? partoCal = DateTime.TryParse(fila1.Cells[4].Value?.ToString(), out DateTime fechaCal) ? fechaCal : null;
+            DateTime? partoReal = DateTime.TryParse(fila1.Cells[5].Value?.ToString(), out DateTime fechaReal) ? fechaReal : null;
+            string camadaNur = fila1.Cells[6].Value?.ToString().Trim();
+            string machoNumber = fila1.Cells[7].Value?.ToString().Trim();
+            string razaMacho = fila1.Cells[8].Value?.ToString().Trim();
+            DateTime? fechaServicio = DateTime.TryParse(fila1.Cells[9].Value?.ToString(), out DateTime fechaServiu) ? fechaServiu : null;
+            TimeSpan? horaInicio = TimeSpan.TryParse(fila1.Cells[10].Value?.ToString(), out TimeSpan horaServ) ? horaServ : null;
+            TimeSpan? horaFin = TimeSpan.TryParse(fila1.Cells[11].Value?.ToString(), out TimeSpan horaServFin) ? horaServFin : null;
+            string numeroParidera = fila1.Cells[12].Value?.ToString().Trim();
+
+            if(conection.insertarCamadas(NumberMarrana, razaMarrana, numeroPezones, indParto,
+                partoCal, partoReal, camadaNur, machoNumber, razaMacho, fechaServicio, horaInicio, 
+                horaFin, numeroParidera, label1.Text.Trim().ToLower().Replace(" ", "_")))
+            {
+                MessageBox.Show("Se guardo existosamente!");
+            }
         }
     }
 }
