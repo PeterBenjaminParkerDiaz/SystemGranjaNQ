@@ -325,11 +325,20 @@ namespace granjaAplicativo
                     }
                     else
                     {
-                        fila.Cells[i].Value = DatosTraidos[i];
+                        fila.Cells[i].Value = DatosTraidos[i] ?? "";
                     }
                 }
             }
 
+            var datosTabla2 = conection.obtenerLechonesBD(label1.Text.Trim().ToLower().Replace(" ", "_"));
+            if (datosTabla2.Count > 0)
+            {
+                foreach (var valores in datosTabla2)
+                {
+                    dataGridView2.Rows.Add(valores.numeroLechon?.ToString() ?? "",valores.sexo ?? "", valores.pezonIzquierdo?.ToString() ?? "",
+                        valores.pezonDerecho?.ToString() ?? "", valores.nacimiento ?? "", valores.transferencia ?? "",valores.destete ?? "",valores.observaciones ?? "");
+                }
+            }
         }
         private void estilosDatagridview(DataGridView data, bool estado = false, int? altura = null)
         {
@@ -396,11 +405,34 @@ namespace granjaAplicativo
             TimeSpan? horaFin = TimeSpan.TryParse(fila1.Cells[11].Value?.ToString(), out TimeSpan horaServFin) ? horaServFin : null;
             string numeroParidera = fila1.Cells[12].Value?.ToString().Trim();
 
-            if(conection.insertarCamadas(NumberMarrana, razaMarrana, numeroPezones, indParto,
-                partoCal, partoReal, camadaNur, machoNumber, razaMacho, fechaServicio, horaInicio, 
+            if (conection.insertarCamadas(NumberMarrana, razaMarrana, numeroPezones, indParto,
+                partoCal, partoReal, camadaNur, machoNumber, razaMacho, fechaServicio, horaInicio,
                 horaFin, numeroParidera, label1.Text.Trim().ToLower().Replace(" ", "_")))
             {
                 MessageBox.Show("Se guardo existosamente!");
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var valoresIngreso = new List<(int? numeroLechon, string sexo, int? pezonIzquierdo, int? pezonDerecho, string nacimiento,
+                string transferencia, string destete, string observaciones)>();
+
+            foreach (DataGridViewRow fila in dataGridView2.Rows)
+            {
+                int? numeroLechon = int.TryParse(fila.Cells[0].Value?.ToString(), out int numero) ? numero : null;
+                string sexo = fila.Cells[1].Value?.ToString();
+                int? pezonIzquierdo = int.TryParse(fila.Cells[2].Value?.ToString(), out int izquierdo) ? izquierdo : null;
+                int? pezonDerecho = int.TryParse(fila.Cells[3].Value?.ToString(), out int derecho) ? derecho : null;
+                string nacimiento = fila.Cells[4].Value?.ToString()?.Trim();
+                string transferencia = fila.Cells[5].Value?.ToString()?.Trim();
+                string destete = fila.Cells[6].Value?.ToString()?.Trim();
+                string observaciones = fila.Cells[7].Value?.ToString()?.Trim();
+                valoresIngreso.Add((numeroLechon, sexo, pezonIzquierdo, pezonDerecho, nacimiento, transferencia, destete, observaciones));
+            }
+            if(conection.insertarLechonesBD(valoresIngreso, label1.Text.Trim().ToLower().Replace(" ", "_")))
+            {
+                MessageBox.Show("Datos gurdados correctamente");
             }
         }
     }

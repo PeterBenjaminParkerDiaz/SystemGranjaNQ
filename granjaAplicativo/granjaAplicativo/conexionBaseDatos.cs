@@ -269,5 +269,89 @@ namespace granjaAplicativo
                 return false;
             }
         }
+        public bool insertarLechonesBD(List<(int? numeroLechon, string sexo, int? pezonIzquierdo, int? pezonDerecho,
+                            string nacimiento, string transferencia, string destete, string observaciones)> valores, string tablaName)
+        {
+            try
+            {
+                string consultaSQL1 = $"DELETE FROM lechones_{tablaName};";
+
+                string consultaSQL2 = $"INSERT INTO lechones_{tablaName}(NroLechon, Sexo, PezonI, PezonD, PesoNacimiento, " +
+                    "PesoTransferencia, PesoDestete, Observaciones) VALUES (@NroLechon, @sexo, @PezonI, @PezonD, @PesoNacimiento, " +
+                    "@PesoTransferencia, @PesoDestete, @Observaciones);";
+
+                using (MySqlConnection cone = Conectar())
+                {
+                    using (MySqlTransaction trasa = cone.BeginTransaction())
+                    {
+                        try
+                        {
+                            using (MySqlCommand comando = new MySqlCommand(consultaSQL1, cone, trasa))
+                            {
+                                comando.ExecuteNonQuery();
+                            }
+                            foreach (var valor in valores)
+                            {
+                                using (MySqlCommand cmd = new MySqlCommand(consultaSQL2, cone, trasa))
+                                {
+                                    cmd.Parameters.AddWithValue("@NroLechon", valor.numeroLechon ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@sexo", valor.sexo ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@PezonI", valor.pezonIzquierdo ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@PezonD", valor.pezonDerecho ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@PesoNacimiento", valor.nacimiento ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@PesoTransferencia", valor.transferencia ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@PesoDestete", valor.destete ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@Observaciones", valor.observaciones ?? (object)DBNull.Value);
+                                    cmd.ExecuteNonQuery();
+                                }
+                            }
+                            trasa.Commit();
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            trasa.Rollback();
+                            MessageBox.Show("Problema al guardar los lechones:\n\n" + ex.Message,"Error",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return false;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Hubo un error:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        public List<(int? numeroLechon, string sexo, int? pezonIzquierdo, int? pezonDerecho,string nacimiento, string transferencia, string destete, string observaciones)> obtenerLechonesBD(string tablaName)
+        {
+            var valores = new List<(int? numeroLechon, string sexo, int? pezonIzquierdo, int? pezonDerecho, string nacimiento, string transferencia, string destete, string observaciones)>();
+            string consultaSQL = $"SELECT NroLechon, Sexo, PezonI, PezonD, PesoNacimiento, " +
+                $"PesoTransferencia, PesoDestete, Observaciones FROM lechones_{tablaName};";
+
+            using (MySqlConnection cone = Conectar())
+            {
+                using (MySqlCommand cmd = new MySqlCommand(consultaSQL, cone))
+                {
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int? numeroLechon = reader.IsDBNull(0) ? null : reader.GetInt32(0);
+                            string sexo = reader.IsDBNull(1) ? null : reader.GetString(1);
+                            int? pezonIzquierdo = reader.IsDBNull(2) ? null : reader.GetInt32(2);
+                            int? pezonDerecho = reader.IsDBNull(3) ? null : reader.GetInt32(3);
+                            string nacimiento = reader.IsDBNull(4) ? null : reader.GetString(4);
+                            string transferencia = reader.IsDBNull(5) ? null : reader.GetString(5);
+                            string destete = reader.IsDBNull(6) ? null : reader.GetString(6);
+                            string observaciones = reader.IsDBNull(7) ? null : reader.GetString(7);
+                            valores.Add((numeroLechon, sexo, pezonIzquierdo, pezonDerecho, nacimiento, transferencia, destete, observaciones));
+                        }
+                    }
+                }
+            }
+            return valores;
+        }
     }
 }
