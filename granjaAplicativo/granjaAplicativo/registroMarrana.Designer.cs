@@ -57,7 +57,7 @@
             // 
             // dataGridView2
             // 
-            dataGridView2.Anchor = AnchorStyles.Top;
+            dataGridView2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             dataGridView2.BackgroundColor = SystemColors.ButtonHighlight;
             dataGridView2.BorderStyle = BorderStyle.None;
             dataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -140,6 +140,7 @@
             button3.TabIndex = 9;
             button3.Text = "Guardar cambios";
             button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
             // 
             // label4
             // 

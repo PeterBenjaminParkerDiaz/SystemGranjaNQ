@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
+using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -33,6 +35,15 @@ namespace granjaAplicativo
             dataGridView1.Controls.Add(numberPartos);
             dataGridView1.Columns.Add("NP", "NP");
 
+            DateTimePicker fechaServic = new DateTimePicker();
+            fechaServic.Format = DateTimePickerFormat.Short;
+            fechaServic.Visible = false;
+            fechaServic.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
+            dataGridView1.Controls.Add(fechaServic);
+            dataGridView1.Columns.Add("Fecha Servicio", "Fecha Servicio");
+
+            dataGridView1.Columns.Add("Macho Nro", "Macho Nro");
+            dataGridView1.Columns.Add("Raza", "Raza");
             dataGridView1.Columns.Add("Ind. Parto", "Ind. Parto");
 
             DateTimePicker fechaCalcu = new DateTimePicker();
@@ -50,34 +61,8 @@ namespace granjaAplicativo
             dataGridView1.Columns.Add("Parto Real", "Parto Real");
 
             dataGridView1.Columns.Add("Camada No", "Camada No");
-            dataGridView1.Columns.Add("Macho Nro", "Macho Nro");
-            dataGridView1.Columns.Add("Raza", "Raza");
-
-            DateTimePicker fechaServic = new DateTimePicker();
-            fechaServic.Format = DateTimePickerFormat.Short;
-            fechaServic.Visible = false;
-            fechaServic.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
-            dataGridView1.Controls.Add(fechaServic);
-            dataGridView1.Columns.Add("Fecha Servicio", "Fecha Servicio");
-
-            DateTimePicker horaInicio = new DateTimePicker();
-            horaInicio.Format = DateTimePickerFormat.Custom;
-            horaInicio.CustomFormat = "HH:mm:ss"; // o "hh:mm tt" si quieres AM/PM
-            horaInicio.ShowUpDown = true;
-            horaInicio.Visible = false;
-            horaInicio.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
-            dataGridView1.Controls.Add(horaInicio);
             dataGridView1.Columns.Add("Hora inicio parto", "Hora inicio parto");
-
-            DateTimePicker horaFinal = new DateTimePicker();
-            horaFinal.Format = DateTimePickerFormat.Custom;
-            horaFinal.CustomFormat = "HH:mm:ss"; // o "hh:mm tt" si quieres AM/PM
-            horaFinal.ShowUpDown = true;
-            horaFinal.Visible = false;
-            horaFinal.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
-            dataGridView1.Controls.Add(horaFinal);
             dataGridView1.Columns.Add("Hora fin parto", "Hora fin parto");
-
             dataGridView1.Columns.Add("Nro Paridera", "Nro Paridera");
             estilosDatagridview(dataGridView1);
             dataGridView1.Rows.Add();
@@ -102,14 +87,6 @@ namespace granjaAplicativo
                     else if (er.ColumnIndex == dataGridView1.Columns["Fecha Servicio"].Index)
                     {
                         controlActivo = fechaServic; //Fecha
-                    }
-                    else if (er.ColumnIndex == dataGridView1.Columns["Hora inicio parto"].Index)
-                    {
-                        controlActivo = horaInicio; //Hora
-                    }
-                    else if (er.ColumnIndex == dataGridView1.Columns["Hora fin parto"].Index)
-                    {
-                        controlActivo = horaFinal; //Hora
                     }
                 }
                 if (controlActivo != null)
@@ -145,45 +122,37 @@ namespace granjaAplicativo
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Parto Calc"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells["Parto Calc"].Value = fechaCalcu.Value.ToString("dd/MM/yyyy");
+                        dataGridView1.Rows[er.RowIndex].Cells["Parto Calc"].Value = fechaCalcu.Value.ToShortDateString();
                         fechaCalcu.Visible = false;
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Parto Real"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells["Parto Real"].Value = fechaRealParto.Value.ToString("dd/MM/yyyy");
+                        dataGridView1.Rows[er.RowIndex].Cells["Parto Real"].Value = fechaRealParto.Value.ToShortDateString();
                         fechaRealParto.Visible = false;
                     }
                     else if (er.ColumnIndex == dataGridView1.Columns["Fecha Servicio"].Index)
                     {
-                        dataGridView1.Rows[er.RowIndex].Cells["Fecha Servicio"].Value = fechaServic.Value.ToString("dd/MM/yyyy");
+                        dataGridView1.Rows[er.RowIndex].Cells["Fecha Servicio"].Value = fechaServic.Value.ToShortDateString();
                         fechaServic.Visible = false;
-                    }
-                    else if (er.ColumnIndex == dataGridView1.Columns["Hora inicio parto"].Index)
-                    {
-                        dataGridView1.Rows[er.RowIndex].Cells["Hora inicio parto"].Value = horaInicio.Value.ToString("HH:mm:ss");
-                        horaInicio.Visible = false;
-                    }
-                    else if (er.ColumnIndex == dataGridView1.Columns["Hora fin parto"].Index)
-                    {
-                        dataGridView1.Rows[er.RowIndex].Cells["Hora fin parto"].Value = horaFinal.Value.ToString("HH:mm:ss");
-                        horaFinal.Visible = false;
                     }
                 }
             };
 
-            NumericUpDown numeroLech = new NumericUpDown();
-            numeroLech.Minimum = 0;
-            numeroLech.Maximum = 120;
-            numeroLech.Visible = false;
-            numeroLech.Font = new Font("Segoe UI", 11F);
-            dataGridView2.Controls.Add(numeroLech);
             dataGridView2.Columns.Add("Nro lechón", "Nro lechón");
 
             DataGridViewComboBoxColumn sexo = new DataGridViewComboBoxColumn();
             sexo.Name = "Sexo";
             sexo.HeaderText = "Sexo";
-            sexo.Items.AddRange("Hembra", "Macho");
+            sexo.Items.AddRange("H", "M");
             dataGridView2.Columns.Add(sexo);
+
+            NumericUpDown numIzquier = new NumericUpDown();
+            numIzquier.Minimum = 0;
+            numIzquier.Maximum = 20;
+            numIzquier.Visible = false;
+            numIzquier.Font = new Font("Segoe UI", 11F);
+            dataGridView2.Controls.Add(numIzquier);
+            dataGridView2.Columns.Add("Pezon I", "Pezon I");
 
             NumericUpDown numDerecho = new NumericUpDown();
             numDerecho.Minimum = 0;
@@ -191,62 +160,108 @@ namespace granjaAplicativo
             numDerecho.Visible = false;
             numDerecho.Font = new Font("Segoe UI", 11F);
             dataGridView2.Controls.Add(numDerecho);
-            dataGridView2.Columns.Add("Pezon I", "Pezon I");
-
-            NumericUpDown numIzquierdo = new NumericUpDown();
-            numIzquierdo.Minimum = 0;
-            numIzquierdo.Maximum = 20;
-            numIzquierdo.Visible = false;
-            numIzquierdo.Font = new Font("Segoe UI", 11F);
-            dataGridView2.Controls.Add(numIzquierdo);
             dataGridView2.Columns.Add("Pezon D", "Pezon D");
 
             dataGridView2.Columns.Add("Peso Nacim.", "Peso Nacim.");
+
+            DateTimePicker fechaNaci = new DateTimePicker();
+            fechaNaci.Format = DateTimePickerFormat.Short;
+            fechaNaci.Visible = false;
+            fechaNaci.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
+            dataGridView2.Controls.Add(fechaNaci);
+            dataGridView2.Columns.Add("Fecha Nacim.", "Fecha Nacim.");
+
             dataGridView2.Columns.Add("Peso Transf", "Peso Transf");
+
+            DateTimePicker fechaTrans = new DateTimePicker();
+            fechaTrans.Format = DateTimePickerFormat.Short;
+            fechaTrans.Visible = false;
+            fechaTrans.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
+            dataGridView2.Controls.Add(fechaTrans);
+            dataGridView2.Columns.Add("Fecha Trans.", "Fecha Trans.");
+
             dataGridView2.Columns.Add("Peso Destete", "Peso Destete");
+
+            DateTimePicker fechaDestete = new DateTimePicker();
+            fechaDestete.Format = DateTimePickerFormat.Short;
+            fechaDestete.Visible = false;
+            fechaDestete.Font = new Font("Segoe UI", 11F, FontStyle.Regular);
+            dataGridView2.Controls.Add(fechaDestete);
+            dataGridView2.Columns.Add("Fecha Destete", "Fecha Destete.");
+
             dataGridView2.Columns.Add("Observaciones", "Observaciones");
 
             dataGridView2.CellBeginEdit += (s, e) =>
             {
-                if (e.RowIndex < 0) return;
-                Rectangle rect = dataGridView2.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+                Control controlClic = null;
+                if (e.RowIndex >= 0)
+                {
+                    if (e.ColumnIndex == dataGridView2.Columns["Pezon I"].Index)
+                        controlClic = numIzquier;
 
-                if (e.ColumnIndex == dataGridView2.Columns["Nro lechón"].Index)
-                {
-                    numeroLech.Bounds = rect;
-                    numeroLech.Visible = true;
-                    numeroLech.Value = int.TryParse(dataGridView2.CurrentCell?.Value?.ToString(), out int val) ? val : 0;
+                    else if (e.ColumnIndex == dataGridView2.Columns["Pezon D"].Index)
+                        controlClic = numDerecho;
+
+                    else if (e.ColumnIndex == dataGridView2.Columns["Fecha Nacim."].Index)
+                        controlClic = fechaNaci;
+
+                    else if (e.ColumnIndex == dataGridView2.Columns["Fecha Trans."].Index)
+                        controlClic = fechaTrans;
+
+                    else if (e.ColumnIndex == dataGridView2.Columns["Fecha Destete"].Index)
+                        controlClic = fechaDestete;
                 }
-                else if (e.ColumnIndex == dataGridView2.Columns["Pezon I"].Index)
+
+                if (controlClic != null)
                 {
-                    numIzquierdo.Bounds = rect;
-                    numIzquierdo.Visible = true;
-                    numIzquierdo.Value = int.TryParse(dataGridView2.CurrentCell?.Value?.ToString(), out int val) ? val : 0;
-                }
-                else if (e.ColumnIndex == dataGridView2.Columns["Pezon D"].Index)
-                {
-                    numDerecho.Bounds = rect;
-                    numDerecho.Visible = true;
-                    numDerecho.Value = int.TryParse(dataGridView2.CurrentCell?.Value?.ToString(), out int val) ? val : 0;
+                    Rectangle formaRect = dataGridView2.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, true);
+                    controlClic.Size = new Size(formaRect.Width, formaRect.Height);
+                    controlClic.Location = new Point(formaRect.X, formaRect.Y);
+                    controlClic.Visible = true;
+
+                    if (dataGridView2.CurrentCell != null)
+                    {
+                        if (controlClic is NumericUpDown numerito)
+                            numerito.Value = int.TryParse(dataGridView2.CurrentCell.Value?.ToString(), out int numer) ? numer : 0;
+
+                        else if (controlClic is DateTimePicker dato)
+                            dato.Value = DateTime.TryParse(dataGridView2.CurrentCell.Value?.ToString(), out DateTime fechaPas) ? fechaPas : DateTime.Now;
+                    }
+                    else
+                    {
+                        if (controlClic is NumericUpDown num) num.Value = 0;
+                        else if (controlClic is DateTimePicker dtp) dtp.Value = DateTime.Now;
+                    }
                 }
             };
             dataGridView2.CellEndEdit += (s, e) =>
             {
                 if (e.RowIndex < 0) return;
-                if (e.ColumnIndex == dataGridView2.Columns["Nro lechón"].Index)
+
+                if (e.ColumnIndex == dataGridView2.Columns["Pezon I"].Index)
                 {
-                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numeroLech.Value;
-                    numeroLech.Visible = false;
-                }
-                else if (e.ColumnIndex == dataGridView2.Columns["Pezon I"].Index)
-                {
-                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numIzquierdo.Value;
-                    numIzquierdo.Visible = false;
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numIzquier.Value;
+                    numIzquier.Visible = false;
                 }
                 else if (e.ColumnIndex == dataGridView2.Columns["Pezon D"].Index)
                 {
                     dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = (int)numDerecho.Value;
                     numDerecho.Visible = false;
+                }
+                else if (e.ColumnIndex == dataGridView2.Columns["Fecha Nacim."].Index)
+                {
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = fechaNaci.Value.ToShortDateString();
+                    fechaNaci.Visible = false;
+                }
+                else if (e.ColumnIndex == dataGridView2.Columns["Fecha Trans."].Index)
+                {
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = fechaTrans.Value.ToShortDateString();
+                    fechaTrans.Visible = false;
+                }
+                else if (e.ColumnIndex == dataGridView2.Columns["Fecha Destete"].Index)
+                {
+                    dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = fechaDestete.Value.ToShortDateString();
+                    fechaDestete.Visible = false;
                 }
             };
             estilosDatagridview(dataGridView2, true, 174);
@@ -308,20 +323,9 @@ namespace granjaAplicativo
                 DataGridViewRow fila = dataGridView1.Rows[0];
                 for (int i = 0; i < DatosTraidos.Count; i++)
                 {
-                    if (DatosTraidos[i] == null) continue;
-                    if (i == 4 || i == 5 || i == 9)
+                    if (DateTime.TryParse(DatosTraidos[i]?.ToString(), out DateTime fecha))
                     {
-                        if (DateTime.TryParse(DatosTraidos[i].ToString(), out DateTime fecha))
-                        {
-                            fila.Cells[i].Value = fecha.ToString("dd/MM/yyyy");
-                        }
-                    }
-                    else if (i == 10 || i == 11)
-                    {
-                        if (TimeSpan.TryParse(DatosTraidos[i].ToString(), out TimeSpan hora))
-                        {
-                            fila.Cells[i].Value = hora.ToString(@"hh\:mm\:ss");
-                        }
+                        fila.Cells[i].Value = fecha.ToString("dd/MM/yyyy");
                     }
                     else
                     {
@@ -335,9 +339,19 @@ namespace granjaAplicativo
             {
                 foreach (var valores in datosTabla2)
                 {
-                    dataGridView2.Rows.Add(valores.numeroLechon?.ToString() ?? "",valores.sexo ?? "", valores.pezonIzquierdo?.ToString() ?? "",
-                        valores.pezonDerecho?.ToString() ?? "", valores.nacimiento ?? "", valores.transferencia ?? "",valores.destete ?? "",valores.observaciones ?? "");
+                    dataGridView2.Rows.Add(valores.numeroLechon, valores.sexo, valores.pezonIzquierdo, valores.pezonDerecho,
+                        valores.nacimiento, valores.fechaNacim?.ToString("dd/MM/yyyy"), valores.transferencia,
+                        valores.fechaTransfer?.ToString("dd/MM/yyyy"), valores.destete, valores.fechaDeste?.ToString("dd/MM/yyyy"),
+                        valores.observaciones);
                 }
+            }
+            var fechasTraidas = conection.seleccionarFechas(label1.Text.Trim().ToLower().Replace(" ", "_"));
+            if(fechasTraidas.Count > 0)
+            {               
+                for (int i = 0; i < fechasTraidas.Count && i < dataGridView3.Rows.Count; i++)
+                {
+                    dataGridView3.Rows[i].Cells["Fecha"].Value = fechasTraidas[i]?.ToString("dd/MM/yyyy");
+                }             
             }
         }
         private void estilosDatagridview(DataGridView data, bool estado = false, int? altura = null)
@@ -353,7 +367,7 @@ namespace granjaAplicativo
             data.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", (!estado) ? 12f : 10f, FontStyle.Regular);
             data.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             data.ColumnHeadersHeight = 35;
-            data.Width = estado ? 1082 : data.Width;
+            data.Width = estado ? 1520 : data.Width;
             data.Location = estado ? new Point((this.ClientSize.Width - data.Width) / 2, altura ?? data.Location.Y) : data.Location;
             data.RowTemplate.Height = (!estado) ? 30 : 27;
             data.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#334155");
@@ -394,20 +408,19 @@ namespace granjaAplicativo
             string NumberMarrana = fila1.Cells[0].Value?.ToString().Trim();
             string razaMarrana = fila1.Cells[1].Value?.ToString().Trim();
             int? numeroPezones = int.TryParse(fila1.Cells[2].Value?.ToString(), out int numero) ? numero : null;
-            string indParto = fila1.Cells[3].Value?.ToString().Trim();
-            DateTime? partoCal = DateTime.TryParse(fila1.Cells[4].Value?.ToString(), out DateTime fechaCal) ? fechaCal : null;
-            DateTime? partoReal = DateTime.TryParse(fila1.Cells[5].Value?.ToString(), out DateTime fechaReal) ? fechaReal : null;
-            string camadaNur = fila1.Cells[6].Value?.ToString().Trim();
-            string machoNumber = fila1.Cells[7].Value?.ToString().Trim();
-            string razaMacho = fila1.Cells[8].Value?.ToString().Trim();
-            DateTime? fechaServicio = DateTime.TryParse(fila1.Cells[9].Value?.ToString(), out DateTime fechaServiu) ? fechaServiu : null;
-            TimeSpan? horaInicio = TimeSpan.TryParse(fila1.Cells[10].Value?.ToString(), out TimeSpan horaServ) ? horaServ : null;
-            TimeSpan? horaFin = TimeSpan.TryParse(fila1.Cells[11].Value?.ToString(), out TimeSpan horaServFin) ? horaServFin : null;
+            DateTime? fechaServicio = DateTime.TryParse(fila1.Cells[3].Value?.ToString(), out DateTime fechaServiu) ? fechaServiu : null;
+            string machoNumber = fila1.Cells[4].Value?.ToString().Trim();
+            string razaMacho = fila1.Cells[5].Value?.ToString().Trim();
+            string indParto = fila1.Cells[6].Value?.ToString().Trim();
+            DateTime? partoCal = DateTime.TryParse(fila1.Cells[7].Value?.ToString(), out DateTime fechaCal) ? fechaCal : null;
+            DateTime? partoReal = DateTime.TryParse(fila1.Cells[8].Value?.ToString(), out DateTime fechaReal) ? fechaReal : null;
+            string camadaNur = fila1.Cells[9].Value?.ToString().Trim();
+            string horaInicio = fila1.Cells[10].Value?.ToString().Trim();
+            string horaFin = fila1.Cells[11].Value?.ToString().Trim();
             string numeroParidera = fila1.Cells[12].Value?.ToString().Trim();
 
-            if (conection.insertarCamadas(NumberMarrana, razaMarrana, numeroPezones, indParto,
-                partoCal, partoReal, camadaNur, machoNumber, razaMacho, fechaServicio, horaInicio,
-                horaFin, numeroParidera, label1.Text.Trim().ToLower().Replace(" ", "_")))
+            if (conection.insertarCamadas(NumberMarrana, razaMarrana, numeroPezones, fechaServicio, machoNumber, razaMacho
+                , indParto, partoCal, partoReal, camadaNur, horaInicio, horaFin, numeroParidera, label1.Text.Trim().ToLower().Replace(" ", "_")))
             {
                 MessageBox.Show("Se guardo existosamente!");
             }
@@ -415,24 +428,43 @@ namespace granjaAplicativo
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var valoresIngreso = new List<(int? numeroLechon, string sexo, int? pezonIzquierdo, int? pezonDerecho, string nacimiento,
-                string transferencia, string destete, string observaciones)>();
+            var valoresIngreso = new List<(string numeroLechon, string sexo, int? pezonIzquierdo, int? pezonDerecho, string nacimiento,
+                DateTime? fechaNacim, string transferencia, DateTime? fechaTrans, string destete, DateTime? fechaDest, string observaciones)>();
 
             foreach (DataGridViewRow fila in dataGridView2.Rows)
             {
-                int? numeroLechon = int.TryParse(fila.Cells[0].Value?.ToString(), out int numero) ? numero : null;
+                string numeroLechon = fila.Cells[0].Value?.ToString();
                 string sexo = fila.Cells[1].Value?.ToString();
                 int? pezonIzquierdo = int.TryParse(fila.Cells[2].Value?.ToString(), out int izquierdo) ? izquierdo : null;
                 int? pezonDerecho = int.TryParse(fila.Cells[3].Value?.ToString(), out int derecho) ? derecho : null;
                 string nacimiento = fila.Cells[4].Value?.ToString()?.Trim();
-                string transferencia = fila.Cells[5].Value?.ToString()?.Trim();
-                string destete = fila.Cells[6].Value?.ToString()?.Trim();
-                string observaciones = fila.Cells[7].Value?.ToString()?.Trim();
-                valoresIngreso.Add((numeroLechon, sexo, pezonIzquierdo, pezonDerecho, nacimiento, transferencia, destete, observaciones));
+                DateTime? fechaNacim = DateTime.TryParse(fila.Cells[5].Value?.ToString(), out DateTime fechaNa) ? fechaNa : null;
+                string transferencia = fila.Cells[6].Value?.ToString()?.Trim();
+                DateTime? fechaTrans = DateTime.TryParse(fila.Cells[7].Value?.ToString(), out DateTime fechaTra) ? fechaTra : null;
+                string destete = fila.Cells[8].Value?.ToString()?.Trim();
+                DateTime? fechaDest = DateTime.TryParse(fila.Cells[9].Value?.ToString(), out DateTime fechaDes) ? fechaDes : null;
+                string observaciones = fila.Cells[10].Value?.ToString()?.Trim();
+
+                valoresIngreso.Add((numeroLechon, sexo, pezonIzquierdo, pezonDerecho, nacimiento, fechaNacim, transferencia,
+                    fechaTrans, destete, fechaDest, observaciones));
             }
-            if(conection.insertarLechonesBD(valoresIngreso, label1.Text.Trim().ToLower().Replace(" ", "_")))
+            if (conection.insertarLechonesBD(valoresIngreso, label1.Text.Trim().ToLower().Replace(" ", "_")))
             {
-                MessageBox.Show("Datos gurdados correctamente");
+                MessageBox.Show("Se guardó exitosamente");
+            }
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            List<DateTime?> fechasLechones = new List<DateTime?>();
+            foreach(DataGridViewRow filas in dataGridView3.Rows)
+            {
+                DateTime? fecheActual = DateTime.TryParse(filas.Cells["Fecha"].Value?.ToString(), out DateTime fecha) ? fecha : null;
+                fechasLechones.Add(fecheActual);
+            }
+            if (conection.insertarFechas(fechasLechones, label1.Text.Trim().ToLower().Replace(" ", "_")))
+            {
+                MessageBox.Show("Se guardó exitosamente");
             }
         }
     }
