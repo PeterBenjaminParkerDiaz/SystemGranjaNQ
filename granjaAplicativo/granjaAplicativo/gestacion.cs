@@ -121,9 +121,8 @@ namespace granjaAplicativo
                     nuevoregis.Close();
                 }
                 formpadre.Close();
-                nuevoregis = new registroMarrana();
+                nuevoregis = new registroMarrana(nombreMarana);
                 nuevoregis.Tag = codigoBoton;
-                nuevoregis.label1.Text = nombreMarana;
                 nuevoregis.Show();
             }
         }

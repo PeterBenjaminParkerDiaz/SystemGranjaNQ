@@ -31,7 +31,6 @@
             dataGridView1 = new DataGridView();
             dataGridView2 = new DataGridView();
             agregarFila = new Button();
-            label1 = new Label();
             dataGridView3 = new DataGridView();
             label2 = new Label();
             label3 = new Label();
@@ -52,7 +51,7 @@
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridView1.Location = new Point(12, 46);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(806, 65);
+            dataGridView1.Size = new Size(806, 90);
             dataGridView1.TabIndex = 0;
             // 
             // dataGridView2
@@ -76,17 +75,6 @@
             agregarFila.Text = "Agregar fila";
             agregarFila.UseVisualStyleBackColor = true;
             agregarFila.Click += agregarFila_Click;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.Maroon;
-            label1.Location = new Point(387, -2);
-            label1.Name = "label1";
-            label1.Size = new Size(72, 30);
-            label1.TabIndex = 3;
-            label1.Text = "label1";
             // 
             // dataGridView3
             // 
@@ -177,7 +165,6 @@
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(dataGridView3);
-            Controls.Add(label1);
             Controls.Add(agregarFila);
             Controls.Add(dataGridView2);
             Controls.Add(dataGridView1);
@@ -198,7 +185,6 @@
         private DataGridView dataGridView1;
         private DataGridView dataGridView2;
         private Button agregarFila;
-        public Label label1;
         private DataGridView dataGridView3;
         private Label label2;
         private Label label3;
