@@ -76,10 +76,9 @@ namespace granjaAplicativo
                                         HoraFinParto TIME, totalHoras TIME, CamadaNo VARCHAR(50), NroParidera VARCHAR(50));";
 
             string sqlTablaLechones = $@"CREATE TABLE lechones_{nombreTablas} (Id INT AUTO_INCREMENT PRIMARY KEY,
-                                        NroLechon VARCHAR(50), Sexo VARCHAR(10), PezonI varchar(50), PezonD varchar(50), PesoNacimiento VARCHAR(50),
-                                        PesoTransfer VARCHAR(50), FechaTransfer DATE, PesoDestete VARCHAR(50), FechaDestete DATE, Observaciones VARCHAR(255));";
-
-            string fechasAcum = $"CREATE TABLE fechas_{nombreTablas} (Id INT AUTO_INCREMENT PRIMARY KEY, FechasLechones DATE);";
+                                        NroLechon VARCHAR(50), Sexo VARCHAR(10), PezonI varchar(50), PezonD varchar(50), PesoNacimiento VARCHAR(60),
+                                        PesoTransfer VARCHAR(50), FechaTransfer DATE, PesoDestete VARCHAR(50), FechaDestete DATE, camadaDonan varchar(60),
+                                        camadaRecep VARCHAR(60), control1 VARCHAR(60), control2 VARCHAR(60), destet VARCHAR(60), Observaciones VARCHAR(255));";
 
             using (MySqlConnection conexion = Conectar())
             {
@@ -100,11 +99,7 @@ namespace granjaAplicativo
                         using (MySqlCommand comando3 = new MySqlCommand(sqlTablaLechones, conexion, transac))
                         {
                             comando3.ExecuteNonQuery();
-                        }
-                        using (MySqlCommand comando4 = new MySqlCommand(fechasAcum, conexion, transac))
-                        {
-                            comando4.ExecuteNonQuery();
-                        }
+                        }                      
                         transac.Commit();
                         return true;
                     }
@@ -241,7 +236,7 @@ namespace granjaAplicativo
         {
             try
             {
-                string consultaSQL1 = $"DROP TABLE IF EXISTS registro_{nameTablaBorrar}, lechones_{nameTablaBorrar}, fechas_{nameTablaBorrar};";
+                string consultaSQL1 = $"DROP TABLE IF EXISTS registro_{nameTablaBorrar}, lechones_{nameTablaBorrar};";
                 string consultaSQL2 = "DELETE FROM namemarranas WHERE codigoFila = @codigoArgumento;";
                 using (MySqlConnection conect = Conectar())
                 {
@@ -280,15 +275,17 @@ namespace granjaAplicativo
         }
         public bool insertarLechonesBD(List<(string numeroLechon, string sexo, string pezonIzquierdo, string pezonDerecho,
             string nacimiento, string transferencia, DateTime? fechaTransfer,
-            string destete, DateTime? fechaDestete, string observaciones)> valores, string tablaName)
+            string destete, DateTime? fechaDestete, string camadaDonan, string camadaRecep, string control1, string control2,
+            string destet, string observaciones)> valores, string tablaName)
         {
             try
             {
                 string consultaSQL1 = $"DELETE FROM lechones_{tablaName};";
 
                 string consultaSQL2 = $"INSERT INTO lechones_{tablaName}(NroLechon, Sexo, PezonI, PezonD, PesoNacimiento, " +
-                    "PesoTransfer, FechaTransfer, PesoDestete, FechaDestete, Observaciones) VALUES (@NroLechon, @sexo, @PezonI, @PezonD, @PesoNacimiento, " +
-                    "@PesoTransfer, @FechaTransfer, @PesoDestete, @FechaDestete, @Observaciones);";
+                    "PesoTransfer, FechaTransfer, PesoDestete, FechaDestete, camadaDonan, camadaRecep, control1, control2, destet, Observaciones)" +
+                    " VALUES (@NroLechon, @sexo, @PezonI, @PezonD, @PesoNacimiento, @PesoTransfer, @FechaTransfer, " +
+                    "@PesoDestete, @FechaDestete, @camadaDonan, @camadaRecep, @control1, @control2, @destet, @Observaciones);";
 
                 using (MySqlConnection cone = Conectar())
                 {
@@ -313,6 +310,11 @@ namespace granjaAplicativo
                                     cmd.Parameters.AddWithValue("@FechaTransfer", valor.fechaTransfer ?? (object)DBNull.Value);
                                     cmd.Parameters.AddWithValue("@PesoDestete", valor.destete ?? (object)DBNull.Value);
                                     cmd.Parameters.AddWithValue("@FechaDestete", valor.fechaDestete ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@camadaDonan", valor.camadaDonan ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@camadaRecep", valor.camadaRecep ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@control1", valor.control1 ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@control2", valor.control2 ?? (object)DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@destet", valor.destet ?? (object)DBNull.Value);
                                     cmd.Parameters.AddWithValue("@Observaciones", valor.observaciones ?? (object)DBNull.Value);
                                     cmd.ExecuteNonQuery();
                                 }
@@ -337,13 +339,16 @@ namespace granjaAplicativo
         }
 
         public List<(string numeroLechon, string sexo, string pezonIzquierdo, string pezonDerecho, string nacimiento,
-            string transferencia, DateTime? fechaTransfer, string destete, DateTime? fechaDeste, string observaciones)> obtenerLechonesBD(string tablaName)
-        {
-            var valores = new List<(string numeroLechon, string sexo, string pezonIzquierdo, string pezonDerecho, string nacimiento, 
-                string transferencia, DateTime? fechaTransfer, string destete, DateTime? fechaDeste, string observaciones)>();
+            string transferencia, DateTime? fechaTransfer, string destete, DateTime? fechaDeste, string camaDona,
+            string camaRece, string control1, string control2, string destet, string observaciones)> 
+            obtenerLechonesBD(string tablaName){
 
-            string consultaSQL = $"SELECT NroLechon, Sexo, PezonI, PezonD, PesoNacimiento," +
-                $"PesoTransfer, FechaTransfer, PesoDestete, FechaDestete, Observaciones FROM lechones_{tablaName};";
+            var valores = new List<(string numeroLechon, string sexo, string pezonIzquierdo, string pezonDerecho, 
+                string nacimiento, string transferencia, DateTime? fechaTransfer, string destete, DateTime? fechaDeste, 
+                string camaDona, string camaRece, string control1, string control2, string destet, string observaciones)>();
+
+            string consultaSQL = $"SELECT NroLechon, Sexo, PezonI, PezonD, PesoNacimiento, PesoTransfer, FechaTransfer, PesoDestete," +
+                $"FechaDestete, camadaDonan, camadaRecep, control1, control2, destet, Observaciones FROM lechones_{tablaName};";
 
             using (MySqlConnection cone = Conectar())
             {
@@ -362,60 +367,19 @@ namespace granjaAplicativo
                             DateTime? fechaTransfer = reader.IsDBNull(6) ? null : reader.GetDateTime(6);
                             string destete = reader.IsDBNull(7) ? null : reader.GetString(7);
                             DateTime? fechaDestete = reader.IsDBNull(8) ? null : reader.GetDateTime(8);
-                            string observaciones = reader.IsDBNull(9) ? null : reader.GetString(9);
-                            valores.Add((numeroLechon, sexo, pezonIzquierdo, pezonDerecho, nacimiento,
-                                transferencia, fechaTransfer, destete, fechaDestete, observaciones));
+                            string camaDona = reader.IsDBNull(9) ? null : reader.GetString(9);
+                            string camaRecep = reader.IsDBNull(10) ? null : reader.GetString(10);
+                            string control1 = reader.IsDBNull(11) ? null : reader.GetString(11);
+                            string control2 = reader.IsDBNull(12) ? null : reader.GetString(12);
+                            string destet = reader.IsDBNull(13) ? null : reader.GetString(13);
+                            string observaciones = reader.IsDBNull(14) ? null : reader.GetString(14);
+                            valores.Add((numeroLechon, sexo, pezonIzquierdo, pezonDerecho, nacimiento, transferencia, fechaTransfer, 
+                                destete, fechaDestete, camaDona, camaRecep, control1, control2, destet, observaciones));
                         }
                     }
                 }
             }
             return valores;
-        }
-        public bool insertarFechas(List<DateTime?> fechas, string nameTable)
-        {
-            string consulta = $"INSERT INTO fechas_{nameTable} (FechasLechones) VALUES(@fecha);";
-            if (fechas.Count == 0) return false;
-            try
-            {
-                using (MySqlConnection con = Conectar())
-                {
-                    foreach (var valores in fechas)
-                    {
-                        using (MySqlCommand comando = new MySqlCommand(consulta, con))
-                        {
-                            comando.Parameters.AddWithValue("@fecha", valores);
-                            comando.ExecuteNonQuery();
-                        }
-                    }
-                }
-                return true;
-            }
-            catch (Exception es)
-            {
-                MessageBox.Show("Ocurrio un error: " + es.Message);
-                return false;
-            }
-        }
-        public List<DateTime?> seleccionarFechas(string nameTable)
-        {
-            List<DateTime?> fechas = new List<DateTime?>();
-            string consulta = $"SELECT FechasLechones FROM fechas_{nameTable};";
-            
-            using (MySqlConnection con = Conectar())
-            {
-                using (MySqlCommand comando = new MySqlCommand(consulta, con))
-                {
-                    using (MySqlDataReader lector = comando.ExecuteReader())
-                    {
-                        while (lector.Read())
-                        {
-                            DateTime? fechaEstamo = lector["FechasLechones"] == DBNull.Value ? null : Convert.ToDateTime(lector["FechasLechones"]);
-                            fechas.Add(fechaEstamo);
-                        }
-                    }
-                }               
-            }
-            return fechas;
         }
     }
 }
