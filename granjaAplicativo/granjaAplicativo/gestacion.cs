@@ -38,6 +38,8 @@ namespace granjaAplicativo
                 }
             }
             dataGridView1.CellClick += ejecutarMarrana;
+            textBox1.KeyDown += CrearMarrana_Click;
+            comboBox1.SelectedValueChanged += eliminarMarrana_Click;
         }
 
         private Form formulario;
@@ -152,57 +154,62 @@ namespace granjaAplicativo
                 col.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             }
         }
-        private void CrearMarrana_Click(object sender, EventArgs e)
+        private void CrearMarrana_Click(object sender, KeyEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(textBox1.Text))
+            if(e.KeyCode == Keys.Enter)
             {
-                MessageBox.Show("Por favor, ingrese el nombre o identificacion de la marrana", "Información",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            string valorIngresado = textBox1.Text.Trim();
-            string codigofila = "m_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                e.SuppressKeyPress = true;
 
-            //verifiamos que sea un nombre válido
-            string regex = "^[a-zA-Z0-9]+(?: [a-zA-Z0-9]+)*$";
-            if(!Regex.IsMatch(valorIngresado, regex))
-            {
-                MessageBox.Show("El nombre ingresado no es válido.\n\n" +"Solo se permiten letras, números y espacios entre palabras.\n" +
-                        "No se permiten símbolos especiales.", "Nombre no válido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-            //Evitamos que se dupliquen las mismas marranas
-            if (conect.verificarExisteTabla(valorIngresado.ToLower().Replace(" ", "_")))
-            {
-                MessageBox.Show("Esta marrana ya esta registrada, ingrese un nombre o identificación diferente", "Información",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            //Insertamos la marrana
-            if (conect.insertarMarrana(valorIngresado, codigofila))
-            {
-                int posicion = 0;
-                foreach (DataGridViewRow fila in dataGridView1.Rows)
+                if (string.IsNullOrWhiteSpace(textBox1.Text))
                 {
-                    if (string.Compare(valorIngresado, fila.Cells[0].Value?.ToString(), true) < 0)
-                    {
-                        break;
-                    }
-                    posicion++;
+                    MessageBox.Show("Por favor, ingrese el nombre o identificacion de la marrana", "Información",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
                 }
-                //Insertamos la fila en el datagridview
-                dataGridView1.Rows.Insert(posicion, valorIngresado);
-                dataGridView1.Rows[posicion].Tag = codigofila;
+                string valorIngresado = textBox1.Text.Trim();
+                string codigofila = "m_" + Guid.NewGuid().ToString("N").Substring(0, 8);
 
-                //Insertamos en el comboBox.
-                comboBox1.Items.Insert(posicion, valorIngresado);
+                //verifiamos que sea un nombre válido
+                string regex = "^[a-zA-Z0-9]+(?: [a-zA-Z0-9]+)*$";
+                if (!Regex.IsMatch(valorIngresado, regex))
+                {
+                    MessageBox.Show("El nombre ingresado no es válido.\n\n" + "Solo se permiten letras, números y espacios entre palabras.\n" +
+                            "No se permiten símbolos especiales.", "Nombre no válido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                //Evitamos que se dupliquen las mismas marranas
+                if (conect.verificarExisteTabla(valorIngresado.ToLower().Replace(" ", "_")))
+                {
+                    MessageBox.Show("Esta marrana ya esta registrada, ingrese un nombre o identificación diferente", "Información",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                //Insertamos la marrana
+                if (conect.insertarMarrana(valorIngresado, codigofila))
+                {
+                    int posicion = 0;
+                    foreach (DataGridViewRow fila in dataGridView1.Rows)
+                    {
+                        if (string.Compare(valorIngresado, fila.Cells[0].Value?.ToString(), true) < 0)
+                        {
+                            break;
+                        }
+                        posicion++;
+                    }
+                    //Insertamos la fila en el datagridview
+                    dataGridView1.Rows.Insert(posicion, valorIngresado);
+                    dataGridView1.Rows[posicion].Tag = codigofila;
 
-                //Insertamos en la lista
-                List<Tuple<string, string>> valorINgre = new List<Tuple<string, string>>() { 
+                    //Insertamos en el comboBox.
+                    comboBox1.Items.Insert(posicion, valorIngresado);
+
+                    //Insertamos en la lista
+                    List<Tuple<string, string>> valorINgre = new List<Tuple<string, string>>() {
                     new Tuple<string, string>(valorIngresado, codigofila )};
-                listasTraidas.Insert(posicion, new Tuple<string, string>(valorIngresado, codigofila));
-                textBox1.Text = "";
-            }
+                    listasTraidas.Insert(posicion, new Tuple<string, string>(valorIngresado, codigofila));
+                    textBox1.Text = "";
+                }
+            }        
         }
 
         private void eliminarMarrana_Click(object sender, EventArgs e)

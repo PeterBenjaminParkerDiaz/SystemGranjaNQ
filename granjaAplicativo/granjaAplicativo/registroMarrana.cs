@@ -6,6 +6,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -78,7 +79,6 @@ namespace granjaAplicativo
             dataGridView1.Columns.Add("Nro Paridera", "Nro Paridera");
             estilosDatagridview(dataGridView1);
             dataGridView1.Rows.Add(nameMarrana);
-
             dataGridView1.CellBeginEdit += (es, er) =>
             {
                 DateTimePicker controlActivo = null;
@@ -117,7 +117,7 @@ namespace granjaAplicativo
                     if (DateTime.TryParse(valorCelda?.ToString(), out DateTime valor))                
                         controlActivo.Value = valor;              
                     else                 
-                        controlActivo.Value = DateTime.Now;          
+                        controlActivo.Value = DateTime.Now;
                 }
             };
 
@@ -223,9 +223,12 @@ namespace granjaAplicativo
                     
                 }
             };
+            string[] nombresEjecutar = new string[] { "Peso Nacim.", "Peso Ingreso", "Peso Salida"};
             dataGridView2.CellEndEdit += (s, e) =>
             {
                 if (e.RowIndex < 0) return;
+
+                string nameColumna = dataGridView2.Columns[e.ColumnIndex].Name;
 
                 if (e.ColumnIndex == dataGridView2.Columns["Fecha Ingreso"].Index)
                 {
@@ -237,9 +240,54 @@ namespace granjaAplicativo
                     dataGridView2.Rows[e.RowIndex].Cells[e.ColumnIndex].Value = fechaDestete.Value.ToShortDateString();
                     fechaDestete.Visible = false;
                 }
+                if (nombresEjecutar.Contains(nameColumna))
+                {
+                    float sumaValores = dataGridView2.Rows.Cast<DataGridViewRow>().Sum(fila => float.TryParse(
+                        fila.Cells[nameColumna].Value?.ToString(), out float valor) ? valor : 0);
+                    int countLechones = dataGridView2.Rows.Cast<DataGridViewRow>().Count(fila => float.TryParse(fila.Cells[nameColumna].Value?.ToString(), out _));
+                    float promedio = sumaValores / countLechones;
+
+                    float sumaCuadrados = 0;
+                    foreach (DataGridViewRow fila in dataGridView2.Rows)
+                    {
+                        if (float.TryParse(fila.Cells[nameColumna].Value?.ToString(), out float valor))
+                        {
+                            float diferencia = valor - promedio;
+                            float cuadrado = diferencia * diferencia;
+                            sumaCuadrados += cuadrado;
+                        }
+                    }
+                    float desviacionEstandar = (float)Math.Sqrt(sumaCuadrados / countLechones);
+                    float coeficienVariacion = (desviacionEstandar / promedio) * 100;
+                    switch (nameColumna)
+                    {
+                        case "Peso Nacim.":
+                            label1.Text = $"Peso:  {sumaValores:0.000} Kg";
+                            label3.Text = $"Cantidad lechones:  {countLechones}";
+                            label5.Text = $"X:  {promedio:0.000} kg";
+                            label9.Text = $"Desviación estandar:  {desviacionEstandar:0.000} kg";
+                            label11.Text = $"Coeficiente variación:  {coeficienVariacion:0.000} %";
+                            break;
+
+                        case "Peso Ingreso":
+                            label6.Text = $"   {sumaValores:0.000} kg";
+                            label7.Text = $"   {countLechones}";
+                            label8.Text = $"   {promedio:0.000} kg";
+                            label10.Text = $"   {desviacionEstandar:0.000} kg";
+                            label12.Text = $"   {coeficienVariacion:0.000} %";
+                            label6.ForeColor = Color.Black;
+                            label7.ForeColor = Color.Black;
+                            label8.ForeColor = Color.Black;
+                            label10.ForeColor = Color.Black;
+                            label12.ForeColor = Color.Black;
+                            break;
+                    }
+                }
             };
             estilosDatagridview(dataGridView2, true, 201);
-
+          
+            dataGridView1.KeyDown += pasarCelda;
+            dataGridView2.KeyDown += pasarCelda;
             var DatosTraidos = conection.valoresTraidos(nameMarrana.Trim().ToLower().Replace(" ", "_"));
             if (DatosTraidos.Count > 0)
             {
@@ -276,7 +324,61 @@ namespace granjaAplicativo
                         valores.nacimiento, valores.transferencia, valores.fechaTransfer?.ToString("dd/MM/yyyy"), 
                         valores.destete, valores.fechaDeste?.ToString("dd/MM/yyyy"), valores.camaDona, valores.camaRece, valores.observaciones);
                 }
-            }          
+            }
+            int columnaPeso = dataGridView2.Columns["Pezon D"].Index;
+            int columnaNaci = dataGridView2.Columns["Peso Ingreso"].Index;
+            Rectangle rect1 = dataGridView2.GetCellDisplayRectangle(columnaPeso, -1, true);
+            Rectangle rect2 = dataGridView2.GetCellDisplayRectangle(columnaNaci, -1, true);
+
+            label1.Left = dataGridView2.Left + rect1.Right - label1.Width - 10;
+            label1.Top = dataGridView2.Bottom + 35;
+
+            label3.Left = dataGridView2.Left + rect1.Right - label3.Width - 10;
+            label3.Top = label1.Bottom + 10;
+
+            label5.Left = dataGridView2.Left + rect1.Right - label5.Width - 10;
+            label5.Top = label3.Bottom + 10;
+
+            label9.Left = dataGridView2.Left + rect1.Right - label9.Width - 10;
+            label9.Top = label5.Bottom + 10;
+
+            label11.Left = dataGridView2.Left + rect1.Right - label11.Width - 10;
+            label11.Top = label9.Bottom + 10;
+
+            label6.Left = dataGridView2.Left + rect2.Left;
+            label6.Top = dataGridView2.Bottom + 35;
+
+            label7.Left = dataGridView2.Left + rect2.Left;
+            label7.Top = label6.Bottom + 10;
+
+            label8.Left = dataGridView2.Left + rect2.Left;
+            label8.Top = label7.Bottom + 10;
+
+            label10.Left = dataGridView2.Left + rect2.Left;
+            label10.Top = label8.Bottom + 10;
+
+            label12.Left = dataGridView2.Left + rect2.Left;
+            label12.Top = label10.Bottom + 10;
+
+        }
+        private void pasarCelda(object sender, KeyEventArgs e)
+        {
+            DataGridView dataEstamos = (DataGridView)sender;
+            if (dataEstamos == null) return;
+            if (dataEstamos.CurrentCell == null) return;
+
+            int countColumns = dataEstamos.Columns.Count;
+            int filaEstamos = dataEstamos.CurrentCell.RowIndex;
+            int columnaEstamos = dataEstamos.CurrentCell.ColumnIndex;
+
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                if (columnaEstamos < countColumns - 1)
+                {
+                    dataEstamos.CurrentCell = dataEstamos.Rows[filaEstamos].Cells[columnaEstamos + 1];                                                   
+                }
+            }
         }
         private void diasReturn(DataGridViewRow fila)
         {
@@ -346,7 +448,7 @@ namespace granjaAplicativo
         }
 
         private void agregarFila_Click(object sender, EventArgs e)
-        {
+        {        
             dataGridView2.Rows.Add();
         }
 
