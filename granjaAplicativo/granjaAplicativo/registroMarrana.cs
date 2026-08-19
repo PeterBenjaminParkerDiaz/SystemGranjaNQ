@@ -17,6 +17,7 @@ namespace granjaAplicativo
     {
         conexionBaseDatos conection = new conexionBaseDatos();
         string nameMarrana = null;
+        string[] nombresEjecutar = new string[] { "Peso Nacim.", "Peso Ingreso", "Peso Salida", "Control 1", "Control 2", "Destete" };
         public registroMarrana(string nombreMar)
         {
             InitializeComponent();
@@ -223,7 +224,6 @@ namespace granjaAplicativo
                     
                 }
             };
-            string[] nombresEjecutar = new string[] { "Peso Nacim.", "Peso Ingreso", "Peso Salida"};
             dataGridView2.CellEndEdit += (s, e) =>
             {
                 if (e.RowIndex < 0) return;
@@ -262,30 +262,42 @@ namespace granjaAplicativo
                     switch (nameColumna)
                     {
                         case "Peso Nacim.":
-                            label1.Text = $"Peso:  {sumaValores:0.000} Kg";
+                            Label[] labels1 = new Label[] { label1, label3, label5, label9, label11 };
+                            label1.Text = $"Peso total:  {sumaValores:0.000} Kg";
                             label3.Text = $"Cantidad lechones:  {countLechones}";
-                            label5.Text = $"X:  {promedio:0.000} kg";
+                            label5.Text = $"Promedio:  {promedio:0.000} kg";
                             label9.Text = $"Desviación estandar:  {desviacionEstandar:0.000} kg";
                             label11.Text = $"Coeficiente variación:  {coeficienVariacion:0.000} %";
                             break;
 
                         case "Peso Ingreso":
-                            label6.Text = $"   {sumaValores:0.000} kg";
-                            label7.Text = $"   {countLechones}";
-                            label8.Text = $"   {promedio:0.000} kg";
-                            label10.Text = $"   {desviacionEstandar:0.000} kg";
-                            label12.Text = $"   {coeficienVariacion:0.000} %";
-                            label6.ForeColor = Color.Black;
-                            label7.ForeColor = Color.Black;
-                            label8.ForeColor = Color.Black;
-                            label10.ForeColor = Color.Black;
-                            label12.ForeColor = Color.Black;
+                            ejecLabels(new[] { label6, label7, label8, label10, label12 }, 
+                                sumaValores, countLechones, promedio, desviacionEstandar, coeficienVariacion);
+                            break;
+
+                        case "Peso Salida":
+                            ejecLabels(new[] { label13, label14, label15, label16, label17 },
+                                sumaValores, countLechones, promedio, desviacionEstandar, coeficienVariacion);
+                            break;
+
+                        case "Control 1":
+                            ejecLabels(new[] { label18, label19, label20, label21, label22 },
+                                sumaValores, countLechones, promedio, desviacionEstandar, coeficienVariacion);
+                            break;
+
+                        case "Control 2":
+                            ejecLabels(new[] { label23, label24, label25, label26, label27 },
+                                sumaValores, countLechones, promedio, desviacionEstandar, coeficienVariacion);
+                            break;
+
+                        case "Destete":
+                            ejecLabels(new[] { label28, label29, label30, label31, label32 },
+                                sumaValores, countLechones, promedio, desviacionEstandar, coeficienVariacion);
                             break;
                     }
                 }
             };
             estilosDatagridview(dataGridView2, true, 201);
-          
             dataGridView1.KeyDown += pasarCelda;
             dataGridView2.KeyDown += pasarCelda;
             var DatosTraidos = conection.valoresTraidos(nameMarrana.Trim().ToLower().Replace(" ", "_"));
@@ -325,41 +337,16 @@ namespace granjaAplicativo
                         valores.destete, valores.fechaDeste?.ToString("dd/MM/yyyy"), valores.camaDona, valores.camaRece, valores.observaciones);
                 }
             }
-            int columnaPeso = dataGridView2.Columns["Pezon D"].Index;
-            int columnaNaci = dataGridView2.Columns["Peso Ingreso"].Index;
-            Rectangle rect1 = dataGridView2.GetCellDisplayRectangle(columnaPeso, -1, true);
-            Rectangle rect2 = dataGridView2.GetCellDisplayRectangle(columnaNaci, -1, true);
-
-            label1.Left = dataGridView2.Left + rect1.Right - label1.Width - 10;
-            label1.Top = dataGridView2.Bottom + 35;
-
-            label3.Left = dataGridView2.Left + rect1.Right - label3.Width - 10;
-            label3.Top = label1.Bottom + 10;
-
-            label5.Left = dataGridView2.Left + rect1.Right - label5.Width - 10;
-            label5.Top = label3.Bottom + 10;
-
-            label9.Left = dataGridView2.Left + rect1.Right - label9.Width - 10;
-            label9.Top = label5.Bottom + 10;
-
-            label11.Left = dataGridView2.Left + rect1.Right - label11.Width - 10;
-            label11.Top = label9.Bottom + 10;
-
-            label6.Left = dataGridView2.Left + rect2.Left;
-            label6.Top = dataGridView2.Bottom + 35;
-
-            label7.Left = dataGridView2.Left + rect2.Left;
-            label7.Top = label6.Bottom + 10;
-
-            label8.Left = dataGridView2.Left + rect2.Left;
-            label8.Top = label7.Bottom + 10;
-
-            label10.Left = dataGridView2.Left + rect2.Left;
-            label10.Top = label8.Bottom + 10;
-
-            label12.Left = dataGridView2.Left + rect2.Left;
-            label12.Top = label10.Bottom + 10;
-
+            altoFila(dataGridView2, EventArgs.Empty);
+        }
+        private void ejecLabels(Label[] listaLabels, float sumaValor, int countLech, float promedio, float desvia, float coefic)
+        {
+            listaLabels[0].Text = $"{sumaValor:0.000} kg";
+            listaLabels[1].Text = $"{countLech}";
+            listaLabels[2].Text = $"{promedio:0.000} kg";
+            listaLabels[3].Text = $"{desvia:0.000} kg";
+            listaLabels[4].Text = $"{coefic:0.000} %";
+            foreach (Label lbl in listaLabels) lbl.ForeColor = Color.Black;     
         }
         private void pasarCelda(object sender, KeyEventArgs e)
         {
@@ -400,12 +387,13 @@ namespace granjaAplicativo
         }
 
 
-        string[] vari60 = new string[] {"Sexo", "Pezon I", "Pezon D", "NP", "Peso Nacim.", "Peso Ingreso", "Control 1", "Control 2", "Destete",
-                    "Peso Ingreso", "Peso Salida", "Tmp Gest.", "Tmp parto", "Camada Donante", "Camada Recep.", "H. fin parto", "H. ini. parto"};
+        string[] vari60 = new string[] {"Sexo", "Pezon I", "Pezon D", "NP", "Tmp Gest.", "Tmp parto", 
+            "Camada Donante", "Camada Recep.", "H. fin parto", "H. ini. parto"};
 
-        string[] vari105 = new string[] { "Fecha Ingreso", "Fecha Salida", "Parto Calc", "Parto Real", "Ind. Parto", "Macho Nro",
-                "F. IA", "Marrana Nro", "D pp", "Fecha", "Nro lechón", "Raza", "Raza Macho"};
-        private void estilosDatagridview(DataGridView data, bool estado = false, int? altura = null)
+        string[] vari90 = new string[] { "Fecha Ingreso", "Fecha Salida", "Parto Calc", "Peso Nacim.", "Peso Ingreso", "Peso Salida",
+            "Parto Real", "Ind. Parto", "Macho Nro", "F. IA", "Marrana Nro", "D pp", "Fecha", "Nro lechón", "Raza", 
+            "Raza Macho", "Control 1", "Control 2", "Destete"};
+        private void estilosDatagridview(DataGridView data, bool estado = false, int? posiciYY = null)
         {
             data.RowHeadersVisible = false;
             data.AllowUserToAddRows = false;
@@ -418,8 +406,8 @@ namespace granjaAplicativo
             data.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10f, FontStyle.Regular);
             data.ColumnHeadersDefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             data.ColumnHeadersHeight = 52;
-            data.Width = estado ? 1530 : data.Width;
-            data.Location = new Point(estado ? (this.ClientSize.Width - data.Width) / 2 : data.Location.X, altura ?? data.Location.Y);          
+            data.Width = estado ? 1530 : data.Width;          
+            data.Location = new Point(estado ? (this.ClientSize.Width - data.Width) / 2 : data.Location.X, posiciYY ?? data.Location.Y);          
             data.RowTemplate.Height = (!estado) ? 30 : 27;
             data.ColumnHeadersDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#334155");
             data.AlternatingRowsDefaultCellStyle.BackColor = ColorTranslator.FromHtml("#F0EDED");
@@ -433,7 +421,7 @@ namespace granjaAplicativo
                     column.Width = 64;
                     column.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
                 }
-                else if(vari105.Contains(column.HeaderText))
+                else if(vari90.Contains(column.HeaderText))
                 {
                     column.Width = 90;
                     column.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
@@ -446,10 +434,69 @@ namespace granjaAplicativo
                     || column.HeaderText == "Marrana Nro" || column.HeaderText == "Tmp parto";
             }
         }
+        private void altoFila(object sender, EventArgs e)
+        {
+            DataGridView data = (DataGridView)sender;
+            if (data == null) return;
 
+            int cantidadFilas = data.Rows.Count;
+            int altoDatagrid = data.ColumnHeadersHeight + (cantidadFilas * data.RowTemplate.Height);
+            const int ALTURA_MAXIMA = 500; // Cambia este valor según tu formulario
+            data.Height = Math.Min(altoDatagrid, ALTURA_MAXIMA);
+
+            int columnaPeso = data.Columns["Pezon D"].Index;
+            int columnaNaci = data.Columns["Peso Ingreso"].Index;
+            int columnaPesoSal = data.Columns["Peso Salida"].Index;
+            int control1 = data.Columns["Control 1"].Index;
+            int control2 = data.Columns["Control 2"].Index;
+            int destete = data.Columns["Destete"].Index;
+            Rectangle rect1 = data.GetCellDisplayRectangle(columnaPeso, -1, true);
+            Rectangle rect2 = data.GetCellDisplayRectangle(columnaNaci, -1, true);
+            Rectangle rect3 = data.GetCellDisplayRectangle(columnaPesoSal, -1, true);
+            Rectangle cont1 = data.GetCellDisplayRectangle(control1, -1, true);
+            Rectangle cont2 = data.GetCellDisplayRectangle(control2, -1, true);
+            Rectangle deste = data.GetCellDisplayRectangle(destete, -1, true);
+
+            label1.Left = 389; label1.Top = data.Bottom + 20;
+            label3.Left = 330; label3.Top = label1.Bottom + 10;
+            label5.Left = 388; label5.Top = label3.Bottom + 10;
+            label9.Left = 317; label9.Top = label5.Bottom + 10;
+            label11.Left = 312; label11.Top = label9.Bottom + 10;
+
+            label6.Left = data.Left + rect2.Left; label6.Top = data.Bottom + 20;
+            label7.Left = data.Left + rect2.Left; label7.Top = label6.Bottom + 10;
+            label8.Left = data.Left + rect2.Left; label8.Top = label7.Bottom + 10;
+            label10.Left = data.Left + rect2.Left; label10.Top = label8.Bottom + 10;
+            label12.Left = data.Left + rect2.Left; label12.Top = label10.Bottom + 10;
+
+            label13.Left = data.Left + rect3.Left - 5; label13.Top = data.Bottom + 20;
+            label14.Left = data.Left + rect3.Left - 5; label14.Top = label13.Bottom + 10;
+            label15.Left = data.Left + rect3.Left - 5; label15.Top = label14.Bottom + 10;
+            label16.Left = data.Left + rect3.Left - 5; label16.Top = label15.Bottom + 10;
+            label17.Left = data.Left + rect3.Left - 5; label17.Top = label16.Bottom + 10;
+
+            label18.Left = data.Left + cont1.Left - 5; label18.Top = data.Bottom + 20;
+            label19.Left = data.Left + cont1.Left - 5; label19.Top = label18.Bottom + 10;
+            label20.Left = data.Left + cont1.Left - 5; label20.Top = label19.Bottom + 10;
+            label21.Left = data.Left + cont1.Left - 5; label21.Top = label20.Bottom + 10;
+            label22.Left = data.Left + cont1.Left - 5; label22.Top = label21.Bottom + 10;
+
+            label23.Left = data.Left + cont2.Left - 5; label23.Top = data.Bottom + 20;
+            label24.Left = data.Left + cont2.Left - 5; label24.Top = label23.Bottom + 10;
+            label25.Left = data.Left + cont2.Left - 5; label25.Top = label24.Bottom + 10;
+            label26.Left = data.Left + cont2.Left - 5; label26.Top = label25.Bottom + 10;
+            label27.Left = data.Left + cont2.Left - 5; label27.Top = label26.Bottom + 10;
+
+            label28.Left = data.Left + deste.Left - 5; label28.Top = data.Bottom + 20;
+            label29.Left = data.Left + deste.Left - 5; label29.Top = label28.Bottom + 10;
+            label30.Left = data.Left + deste.Left - 5; label30.Top = label29.Bottom + 10;
+            label31.Left = data.Left + deste.Left - 5; label31.Top = label30.Bottom + 10;
+            label32.Left = data.Left + deste.Left - 5; label32.Top = label31.Bottom + 10;
+        }
         private void agregarFila_Click(object sender, EventArgs e)
         {        
             dataGridView2.Rows.Add();
+            altoFila(dataGridView2, EventArgs.Empty);
         }
 
         private void GuardarCamadas_Click(object sender, EventArgs e)
